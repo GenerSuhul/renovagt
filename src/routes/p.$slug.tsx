@@ -172,7 +172,7 @@ function ProductPage() {
           </TabsContent>
           <TabsContent value="stores" className="mt-4">
             <div className="bg-card border border-border rounded-xl divide-y divide-border">
-              {stores.map((s) => (
+              {stores.map((s: typeof stores[number]) => (
                 <div key={s.id} className="p-4 flex items-center justify-between gap-4">
                   <div>
                     <div className="font-semibold">{s.name}</div>
