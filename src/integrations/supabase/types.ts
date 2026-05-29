@@ -14,7 +14,165 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      addresses: {
+        Row: {
+          city: string
+          country: string
+          created_at: string
+          id: string
+          is_default: boolean
+          label: string
+          line1: string
+          line2: string | null
+          phone: string | null
+          postal_code: string | null
+          recipient: string
+          state: string | null
+          user_id: string
+        }
+        Insert: {
+          city: string
+          country?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label: string
+          line1: string
+          line2?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          recipient: string
+          state?: string | null
+          user_id: string
+        }
+        Update: {
+          city?: string
+          country?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          line1?: string
+          line2?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          recipient?: string
+          state?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          created_at: string
+          fulfillment: string
+          id: string
+          items: Json
+          order_number: string
+          sap_doc_entry: number | null
+          sap_sync_status: string | null
+          shipping: number
+          shipping_address: Json | null
+          status: string
+          store_id: string | null
+          subtotal: number
+          tax: number
+          total: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          fulfillment?: string
+          id?: string
+          items?: Json
+          order_number?: string
+          sap_doc_entry?: number | null
+          sap_sync_status?: string | null
+          shipping?: number
+          shipping_address?: Json | null
+          status?: string
+          store_id?: string | null
+          subtotal?: number
+          tax?: number
+          total?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          fulfillment?: string
+          id?: string
+          items?: Json
+          order_number?: string
+          sap_doc_entry?: number | null
+          sap_sync_status?: string | null
+          shipping?: number
+          shipping_address?: Json | null
+          status?: string
+          store_id?: string | null
+          subtotal?: number
+          tax?: number
+          total?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      wishlist_items: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          product_image: string | null
+          product_name: string
+          product_price: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          product_image?: string | null
+          product_name: string
+          product_price: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          product_image?: string | null
+          product_name?: string
+          product_price?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
