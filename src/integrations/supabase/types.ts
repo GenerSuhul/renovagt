@@ -143,6 +143,33 @@ export type Database = {
         }
         Relationships: []
       }
+      sap_events: {
+        Row: {
+          event_type: string
+          id: string
+          payload: Json | null
+          processed_at: string | null
+          processing_error: string | null
+          received_at: string
+        }
+        Insert: {
+          event_type: string
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          processing_error?: string | null
+          received_at?: string
+        }
+        Update: {
+          event_type?: string
+          id?: string
+          payload?: Json | null
+          processed_at?: string | null
+          processing_error?: string | null
+          received_at?: string
+        }
+        Relationships: []
+      }
       wishlist_items: {
         Row: {
           created_at: string

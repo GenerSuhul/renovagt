@@ -1,1 +1,4 @@
 project_id = "vciksohdjxjrnhnipkls"
+
+[functions.sap-events-handler]
+verify_jwt = false
