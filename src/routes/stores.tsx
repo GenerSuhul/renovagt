@@ -14,7 +14,8 @@ export const Route = createFileRoute("/stores")({
 });
 
 function StoresPage() {
-  const { stores } = Route.useLoaderData();
+  const { stores: storesRaw } = Route.useLoaderData();
+  const stores = storesRaw as import("@/lib/types").Store[];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -23,6 +24,7 @@ function StoresPage() {
 
       <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {stores.map((s) => (
+
           <div key={s.id} className="bg-card border border-border rounded-xl p-6 hover:shadow-[var(--shadow-card-hover)] transition-shadow">
             <div className="h-32 -mx-6 -mt-6 mb-4 rounded-t-xl bg-gradient-to-br from-secondary to-primary" />
             <h3 className="font-bold text-lg">{s.name}</h3>

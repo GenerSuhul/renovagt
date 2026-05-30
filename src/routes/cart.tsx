@@ -15,11 +15,13 @@ export const Route = createFileRoute("/cart")({
 function CartPage() {
   const { shippingMethods } = Route.useLoaderData();
   const { lines, update, remove, subtotal, count } = useCart();
-  const deliveryMethod = shippingMethods.find((method) => method.type === "delivery") ?? shippingMethods[0];
+  const methods = shippingMethods as import("@/lib/types").ShippingMethod[];
+  const deliveryMethod = methods.find((method) => method.type === "delivery") ?? methods[0];
   const shipping =
     !deliveryMethod || subtotal === 0 || (deliveryMethod.freeFrom !== undefined && subtotal >= deliveryMethod.freeFrom)
       ? 0
       : deliveryMethod.basePrice;
+
   const tax = subtotal * 0.12;
   const total = subtotal + shipping + tax;
 
