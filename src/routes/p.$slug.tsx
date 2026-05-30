@@ -160,7 +160,7 @@ function ProductPage() {
             <div className="bg-card border border-border rounded-xl p-6">
               {product.specs?.length ? (
                 <dl className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
-                  {product.specs.map((s) => (
+                  {product.specs.map((s: { label: string; value: string }) => (
                     <div key={s.label} className="flex justify-between border-b border-border pb-2 text-sm">
                       <dt className="text-muted-foreground">{s.label}</dt>
                       <dd className="font-medium">{s.value}</dd>
