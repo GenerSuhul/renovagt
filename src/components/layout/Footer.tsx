@@ -1,8 +1,11 @@
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Facebook, Instagram, Twitter, Youtube, MapPin, Phone, Mail, ShieldCheck, Truck, CreditCard, RotateCcw } from "lucide-react";
-import { categories } from "@/lib/mock-data";
+import { getCategories } from "@/lib/catalog";
 
 export function Footer() {
+  const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: getCategories });
+
   return (
     <footer className="bg-secondary text-secondary-foreground mt-16">
       {/* Service strip */}
@@ -81,7 +84,7 @@ export function Footer() {
       <div className="border-t border-white/10">
         <div className="container mx-auto px-4 py-5 text-xs opacity-70 flex flex-col md:flex-row gap-2 justify-between">
           <span>© {new Date().getFullYear()} RENOVA. Todos los derechos reservados.</span>
-          <span>Sistema integrado con SAP Business One HANA</span>
+          <span>Compra segura, retiro en tienda y envíos a Guatemala</span>
         </div>
       </div>
     </footer>

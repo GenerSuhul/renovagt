@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatPrice } from "@/lib/format";
-import { stores } from "@/lib/mock-data";
+import { getShippingMethods, getStores } from "@/lib/catalog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,15 +15,20 @@ import { CheckCircle2, Truck, Store } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — RENOVA" }] }),
+  loader: async () => {
+    const [stores, shippingMethods] = await Promise.all([getStores(), getShippingMethods()]);
+    return { stores, shippingMethods };
+  },
   component: CheckoutPage,
 });
 
 function CheckoutPage() {
+  const { stores, shippingMethods } = Route.useLoaderData();
   const { lines, subtotal, clear } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [fulfillment, setFulfillment] = useState<"delivery" | "pickup">("delivery");
-  const [storeId, setStoreId] = useState(stores[0].id);
+  const [storeId, setStoreId] = useState(stores[0]?.id ?? "");
   const [form, setForm] = useState({
     email: user?.email ?? "",
     name: "",
@@ -36,7 +41,12 @@ function CheckoutPage() {
   const [terms, setTerms] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const shipping = fulfillment === "pickup" ? 0 : subtotal > 500 ? 0 : 45;
+  const deliveryMethod = shippingMethods.find((method) => method.type === "delivery") ?? shippingMethods[0];
+  const pickupMethod = shippingMethods.find((method) => method.type === "pickup");
+  const shipping =
+    fulfillment === "pickup" || !deliveryMethod || (deliveryMethod.freeFrom !== undefined && subtotal >= deliveryMethod.freeFrom)
+      ? 0
+      : deliveryMethod.basePrice;
   const tax = subtotal * 0.12;
   const total = subtotal + shipping + tax;
 
@@ -111,16 +121,20 @@ function CheckoutPage() {
                 <RadioGroupItem value="delivery" />
                 <Truck className="h-5 w-5 text-primary mt-0.5" />
                 <div className="flex-1">
-                  <div className="font-semibold text-sm">Envío a domicilio</div>
-                  <div className="text-xs text-muted-foreground">24-72h hábiles · Q45 (gratis &gt; Q500)</div>
+                  <div className="font-semibold text-sm">{deliveryMethod?.name ?? "Envio a domicilio"}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {[deliveryMethod?.estimatedDays, deliveryMethod?.basePrice ? formatPrice(deliveryMethod.basePrice) : undefined]
+                      .filter(Boolean)
+                      .join(" - ")}
+                  </div>
                 </div>
               </label>
               <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${fulfillment === "pickup" ? "border-primary bg-accent" : "border-border"}`}>
                 <RadioGroupItem value="pickup" />
                 <Store className="h-5 w-5 text-primary mt-0.5" />
                 <div className="flex-1">
-                  <div className="font-semibold text-sm">Retiro en tienda — Gratis</div>
-                  <div className="text-xs text-muted-foreground">Listo al siguiente día hábil</div>
+                  <div className="font-semibold text-sm">{pickupMethod?.name ?? "Retiro en tienda"}</div>
+                  <div className="text-xs text-muted-foreground">{pickupMethod?.estimatedDays ?? ""}</div>
                 </div>
               </label>
             </RadioGroup>
@@ -164,12 +178,6 @@ function CheckoutPage() {
             </Section>
           )}
 
-          <Section title="Pago">
-            <div className="bg-accent border border-primary/20 rounded-lg p-4 text-sm">
-              <strong className="text-accent-foreground">Modo demostración:</strong>
-              <span className="text-muted-foreground ml-1">El pago real se integrará con el procesador del cliente (Visanet/Recurrente). Por ahora se simula la confirmación.</span>
-            </div>
-          </Section>
         </div>
 
         <aside className="bg-card border border-border rounded-xl p-6 h-fit sticky top-32">

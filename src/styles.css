@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Manrope", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Roboto", "Aptos", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -37,30 +37,31 @@
   --color-ring: var(--ring);
   --color-surface: var(--surface);
   --color-surface-strong: var(--surface-strong);
-  --shadow-card: 0 1px 2px oklch(0 0 0 / 0.04), 0 4px 12px oklch(0 0 0 / 0.04);
-  --shadow-card-hover: 0 4px 8px oklch(0 0 0 / 0.06), 0 12px 32px oklch(0 0 0 / 0.08);
+  --shadow-card: 0 1px 2px oklch(0 0 0 / 0.04), 0 8px 24px oklch(0.22 0.03 250 / 0.07);
+  --shadow-card-hover: 0 8px 18px oklch(0.22 0.03 250 / 0.08), 0 24px 56px oklch(0.22 0.03 250 / 0.14);
+  --shadow-enterprise: 0 18px 60px oklch(0.18 0.03 250 / 0.16);
 }
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background: oklch(0.985 0.004 82);
   --foreground: oklch(0.18 0.02 250);
-  --surface: oklch(0.985 0.005 250);
-  --surface-strong: oklch(0.96 0.008 250);
+  --surface: oklch(0.97 0.008 86);
+  --surface-strong: oklch(0.93 0.012 88);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.18 0.02 250);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.02 250);
   /* RENOVA orange */
-  --primary: oklch(0.68 0.19 45);
+  --primary: oklch(0.66 0.2 42);
   --primary-foreground: oklch(1 0 0);
-  --primary-hover: oklch(0.62 0.2 42);
+  --primary-hover: oklch(0.58 0.2 40);
   /* Deep corporate green */
-  --secondary: oklch(0.36 0.09 155);
+  --secondary: oklch(0.25 0.05 250);
   --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.96 0.008 250);
+  --muted: oklch(0.94 0.008 86);
   --muted-foreground: oklch(0.5 0.02 250);
-  --accent: oklch(0.94 0.04 45);
+  --accent: oklch(0.94 0.055 48);
   --accent-foreground: oklch(0.32 0.13 45);
   --success: oklch(0.62 0.16 150);
   --success-foreground: oklch(1 0 0);
@@ -113,5 +114,33 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--color-primary) 25%, white);
+  }
+}
+
+@layer utilities {
+  .retail-shell,
+  .enterprise-shell {
+    background:
+      linear-gradient(180deg, oklch(0.98 0.01 86) 0%, oklch(0.955 0.012 86) 42%, oklch(0.985 0.006 86) 100%);
+  }
+
+  .commerce-grid {
+    background-image:
+      linear-gradient(oklch(0.2 0.02 250 / 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, oklch(0.2 0.02 250 / 0.045) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  .glass-panel {
+    background: color-mix(in oklab, white 86%, transparent);
+    backdrop-filter: blur(18px);
+  }
+
+  .renova-container {
+    width: min(100% - 2rem, 1720px);
+    margin-inline: auto;
   }
 }

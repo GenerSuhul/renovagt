@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { ChevronRight, SlidersHorizontal } from "lucide-react";
-import { getCategoryBySlug, getProductsByCategory, brands as allBrands } from "@/lib/mock-data";
+import { getCategoryBySlug, getProductsByCategory } from "@/lib/catalog";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -10,10 +10,11 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/c/$slug")({
-  loader: ({ params }) => {
-    const category = getCategoryBySlug(params.slug);
+  loader: async ({ params }) => {
+    const category = await getCategoryBySlug(params.slug);
     if (!category) throw notFound();
-    return { category };
+    const products = await getProductsByCategory(params.slug);
+    return { category, products };
   },
   head: ({ loaderData }) => ({
     meta: [
@@ -34,8 +35,7 @@ export const Route = createFileRoute("/c/$slug")({
 });
 
 function CategoryPage() {
-  const { category } = Route.useLoaderData();
-  const all = useMemo(() => getProductsByCategory(category.slug), [category.slug]);
+  const { category, products: all } = Route.useLoaderData();
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [sort, setSort] = useState("relevance");
 

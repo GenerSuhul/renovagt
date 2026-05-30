@@ -2,17 +2,24 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { formatPrice } from "@/lib/format";
+import { getShippingMethods } from "@/lib/catalog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({ meta: [{ title: "Carrito — RENOVA" }] }),
+  loader: async () => ({ shippingMethods: await getShippingMethods() }),
   component: CartPage,
 });
 
 function CartPage() {
+  const { shippingMethods } = Route.useLoaderData();
   const { lines, update, remove, subtotal, count } = useCart();
-  const shipping = subtotal > 500 || subtotal === 0 ? 0 : 45;
+  const deliveryMethod = shippingMethods.find((method) => method.type === "delivery") ?? shippingMethods[0];
+  const shipping =
+    !deliveryMethod || subtotal === 0 || (deliveryMethod.freeFrom !== undefined && subtotal >= deliveryMethod.freeFrom)
+      ? 0
+      : deliveryMethod.basePrice;
   const tax = subtotal * 0.12;
   const total = subtotal + shipping + tax;
 
