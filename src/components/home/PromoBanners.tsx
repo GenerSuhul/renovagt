@@ -1,46 +1,32 @@
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
-
-const PROMOS = [
-  {
-    title: "Hasta 30% OFF",
-    subtitle: "en pintura y accesorios",
-    cta: "Ver pintura",
-    href: "pintura",
-    gradient: "from-primary to-primary-hover",
-  },
-  {
-    title: "Nuevas llegadas",
-    subtitle: "Herramientas profesionales",
-    cta: "Descubrir",
-    href: "herramientas",
-    gradient: "from-secondary to-secondary",
-  },
-  {
-    title: "Renueva tu hogar",
-    subtitle: "Iluminación y decoración",
-    cta: "Comprar ahora",
-    href: "iluminacion",
-    gradient: "from-accent-foreground to-secondary",
-  },
-];
+import { getPromotionalBanners } from "@/lib/catalog";
 
 export function PromoBanners() {
+  const { data: promos = [] } = useQuery({
+    queryKey: ["promotional-banners", "home_promo"],
+    queryFn: () => getPromotionalBanners("home_promo"),
+  });
+
+  if (promos.length === 0) return null;
+
   return (
-    <section className="container mx-auto px-4 grid md:grid-cols-3 gap-4 py-8">
-      {PROMOS.map((p) => (
+    <section className="container mx-auto grid gap-4 px-4 py-8 md:grid-cols-3">
+      {promos.map((promo) => (
         <Link
-          key={p.title}
-          to="/c/$slug"
-          params={{ slug: p.href }}
-          className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${p.gradient} text-primary-foreground p-7 min-h-[160px] flex flex-col justify-between group`}
+          key={promo.id}
+          to={promo.targetUrl || "/"}
+          className="group relative flex min-h-[180px] flex-col justify-between overflow-hidden rounded-xl bg-secondary p-7 text-primary-foreground"
         >
-          <div>
-            <div className="text-sm opacity-90">{p.subtitle}</div>
-            <div className="text-2xl md:text-3xl font-black mt-1">{p.title}</div>
+          <img src={promo.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-45" />
+          <div className="absolute inset-0 bg-gradient-to-br from-black/60 to-primary/70" />
+          <div className="relative">
+            {promo.subtitle && <div className="text-sm opacity-90">{promo.subtitle}</div>}
+            <div className="mt-1 text-2xl font-black md:text-3xl">{promo.title}</div>
           </div>
-          <div className="flex items-center gap-1 text-sm font-semibold group-hover:gap-2 transition-all">
-            {p.cta} <ArrowRight className="h-4 w-4" />
+          <div className="relative flex items-center gap-1 text-sm font-semibold transition-all group-hover:gap-2">
+            Ver mas <ArrowRight className="h-4 w-4" />
           </div>
         </Link>
       ))}

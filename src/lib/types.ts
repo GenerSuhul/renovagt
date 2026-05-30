@@ -40,6 +40,26 @@ export type Store = {
   hours: string;
 };
 
+export type PromotionalBanner = {
+  id: string;
+  title: string;
+  subtitle?: string;
+  image: string;
+  targetUrl?: string;
+  placement: string;
+  sortOrder: number;
+};
+
+export type ShippingMethod = {
+  id: string;
+  code: string;
+  name: string;
+  type: string;
+  basePrice: number;
+  freeFrom?: number;
+  estimatedDays?: string;
+};
+
 export type CartLine = {
   productId: string;
   sku: string;

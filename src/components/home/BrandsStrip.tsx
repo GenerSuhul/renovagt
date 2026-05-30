@@ -1,6 +1,9 @@
-import { brands } from "@/lib/mock-data";
+import { useQuery } from "@tanstack/react-query";
+import { getBrands } from "@/lib/catalog";
 
 export function BrandsStrip() {
+  const { data: brands = [] } = useQuery({ queryKey: ["brands"], queryFn: getBrands });
+
   return (
     <section className="bg-surface border-y border-border">
       <div className="container mx-auto px-4 py-8">

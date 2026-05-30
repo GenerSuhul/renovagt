@@ -1,34 +1,59 @@
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import {
-  Wrench, PaintBucket, HardHat, Zap, Droplet, Lightbulb, Trees, Sofa, Refrigerator,
+  Droplet,
+  HardHat,
+  Lightbulb,
+  PaintBucket,
+  Refrigerator,
+  Sofa,
+  Trees,
+  Wrench,
+  Zap,
 } from "lucide-react";
-import { categories } from "@/lib/mock-data";
+import { getCategories } from "@/lib/catalog";
 
 const ICONS = { Wrench, PaintBucket, HardHat, Zap, Droplet, Lightbulb, Trees, Sofa, Refrigerator };
 
 export function CategoryTiles() {
+  const { data: categories = [] } = useQuery({ queryKey: ["categories"], queryFn: getCategories });
+  if (categories.length === 0) return null;
+
   return (
-    <section className="container mx-auto px-4 py-12">
-      <div className="flex items-end justify-between mb-6">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-black">Explora por categoría</h2>
-          <p className="text-muted-foreground mt-1">Todo lo que necesitas, organizado para ti.</p>
-        </div>
+    <section className="renova-container px-4 py-5">
+      <div className="mb-4">
+        <h2 className="text-2xl font-black md:text-3xl">Compra por departamento</h2>
+        <p className="mt-1 text-muted-foreground">Encuentra rápido lo que necesitas para tu proyecto.</p>
       </div>
-      <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-9 gap-3">
-        {categories.map((c) => {
-          const Icon = (ICONS as Record<string, typeof Wrench>)[c.icon ?? "Wrench"] ?? Wrench;
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {categories.map((category) => {
+          const Icon = (ICONS as Record<string, typeof Wrench>)[category.icon ?? "Wrench"] ?? Wrench;
           return (
             <Link
-              key={c.id}
+              key={category.id}
               to="/c/$slug"
-              params={{ slug: c.slug }}
-              className="group flex flex-col items-center gap-2 p-4 rounded-xl bg-card border border-border hover:border-primary hover:shadow-[var(--shadow-card)] transition-all text-center"
+              params={{ slug: category.slug }}
+              className="group relative min-h-[230px] overflow-hidden rounded-xl bg-card shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-hover)]"
             >
-              <div className="h-12 w-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                <Icon className="h-6 w-6" />
+              {category.image && (
+                <img
+                  src={category.image}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/25 to-black/10" />
+              <div className="relative z-10 flex h-full min-h-[230px] flex-col justify-between p-6 text-white">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-primary">
+                  <Icon className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black">{category.name}</h3>
+                  <span className="mt-4 inline-flex rounded-md bg-white px-5 py-2 text-sm font-bold text-foreground">
+                    Ver productos
+                  </span>
+                </div>
               </div>
-              <span className="text-xs font-medium leading-tight">{c.name}</span>
             </Link>
           );
         })}

@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronRight, Star, Truck, Store, ShieldCheck, Heart, Minus, Plus, Check } from "lucide-react";
-import { getProductBySlug, getRelatedProducts, stores } from "@/lib/mock-data";
+import { getProductBySlug, getRelatedProducts, getShippingMethods, getStores } from "@/lib/catalog";
 import { formatPrice } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,10 +10,15 @@ import { ProductCard } from "@/components/product/ProductCard";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/p/$slug")({
-  loader: ({ params }) => {
-    const product = getProductBySlug(params.slug);
+  loader: async ({ params }) => {
+    const product = await getProductBySlug(params.slug);
     if (!product) throw notFound();
-    return { product };
+    const [related, stores, shippingMethods] = await Promise.all([
+      getRelatedProducts(product),
+      getStores(),
+      getShippingMethods(),
+    ]);
+    return { product, related, stores, shippingMethods };
   },
   head: ({ loaderData }) => ({
     meta: [
@@ -37,12 +42,13 @@ export const Route = createFileRoute("/p/$slug")({
 });
 
 function ProductPage() {
-  const { product } = Route.useLoaderData();
+  const { product, related, stores, shippingMethods } = Route.useLoaderData();
+  const deliveryMethod = shippingMethods.find((method) => method.type === "delivery") ?? shippingMethods[0];
+  const pickupMethod = shippingMethods.find((method) => method.type === "pickup");
   const { add } = useCart();
   const [qty, setQty] = useState(1);
   const [pickup, setPickup] = useState(false);
 
-  const related = getRelatedProducts(product);
   const inStock = product.stock > 0;
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -106,8 +112,12 @@ function ProductPage() {
             >
               <Truck className="h-5 w-5 mt-0.5 text-primary" />
               <div className="flex-1">
-                <div className="font-semibold text-sm">Envío a domicilio</div>
-                <div className="text-xs text-muted-foreground">Recibe en 24-72h en Guatemala</div>
+                <div className="font-semibold text-sm">{deliveryMethod?.name ?? "Envio a domicilio"}</div>
+                <div className="text-xs text-muted-foreground">
+                  {[deliveryMethod?.estimatedDays, deliveryMethod?.basePrice ? formatPrice(deliveryMethod.basePrice) : undefined]
+                    .filter(Boolean)
+                    .join(" - ")}
+                </div>
               </div>
             </button>
             <button
@@ -116,8 +126,8 @@ function ProductPage() {
             >
               <Store className="h-5 w-5 mt-0.5 text-primary" />
               <div className="flex-1">
-                <div className="font-semibold text-sm">Retiro en tienda — Gratis</div>
-                <div className="text-xs text-muted-foreground">Disponible en {stores.length} tiendas RENOVA</div>
+                <div className="font-semibold text-sm">{pickupMethod?.name ?? "Retiro en tienda"}</div>
+                <div className="text-xs text-muted-foreground">Disponible en {stores.length} tiendas</div>
               </div>
             </button>
           </div>
@@ -185,9 +195,17 @@ function ProductPage() {
           </TabsContent>
           <TabsContent value="shipping" className="mt-4">
             <div className="bg-card border border-border rounded-xl p-6 text-sm space-y-2 text-muted-foreground">
-              <p>• Envío estándar a todo Guatemala: 24-72 horas hábiles.</p>
-              <p>• Envío gratis en compras mayores a Q500.</p>
-              <p>• Retiro en tienda: disponible al día siguiente, sin costo.</p>
+              {shippingMethods.length === 0 ? (
+                <p>No hay metodos de envio configurados.</p>
+              ) : (
+                shippingMethods.map((method) => (
+                  <p key={method.id}>
+                    {method.name}: {[method.estimatedDays, method.basePrice ? formatPrice(method.basePrice) : undefined]
+                      .filter(Boolean)
+                      .join(" - ")}
+                  </p>
+                ))
+              )}
             </div>
           </TabsContent>
         </Tabs>

@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MapPin, Phone, Clock } from "lucide-react";
-import { stores } from "@/lib/mock-data";
+import { getStores } from "@/lib/catalog";
 
 export const Route = createFileRoute("/stores")({
+  loader: async () => ({ stores: await getStores() }),
   head: () => ({
     meta: [
       { title: "Nuestras tiendas — RENOVA" },
@@ -13,6 +14,8 @@ export const Route = createFileRoute("/stores")({
 });
 
 function StoresPage() {
+  const { stores } = Route.useLoaderData();
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl md:text-4xl font-black">Nuestras tiendas</h1>
