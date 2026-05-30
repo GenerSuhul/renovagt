@@ -43,11 +43,12 @@ export async function requestForzaQuote(payload: {
     package_count: payload.packageCount ?? 1,
   });
 
+  const shipmentRecord = (shipment ?? {}) as DbRecord;
   await enqueueEnterpriseEvent({
     eventType: "forza.quote_requested",
     aggregateType: "shipments",
-    aggregateId: String(shipment.id ?? ""),
-    payload: shipment,
+    aggregateId: String(shipmentRecord.id ?? ""),
+    payload: shipmentRecord,
   });
 
   return shipment;
@@ -69,15 +70,17 @@ export async function reserveRealtimeStock(payload: {
     expires_at: payload.expiresAt ?? null,
   });
 
+  const reservationRecord = (reservation ?? {}) as DbRecord;
   await enqueueEnterpriseEvent({
     eventType: "inventory.reserved",
     aggregateType: "inventory_reservations",
-    aggregateId: String(reservation.id ?? ""),
-    payload: reservation,
+    aggregateId: String(reservationRecord.id ?? ""),
+    payload: reservationRecord,
   });
 
   return reservation;
 }
+
 
 export async function markProductImagePrimary(imageId: string, productId: string) {
   await enqueueEnterpriseEvent({

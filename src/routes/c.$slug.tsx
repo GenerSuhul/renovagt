@@ -35,7 +35,8 @@ export const Route = createFileRoute("/c/$slug")({
 });
 
 function CategoryPage() {
-  const { category, products: all } = Route.useLoaderData();
+  const { category, products } = Route.useLoaderData();
+  const all = products as import("@/lib/types").Product[];
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [sort, setSort] = useState("relevance");
 
@@ -50,7 +51,8 @@ function CategoryPage() {
     return r;
   }, [all, selectedBrands, sort]);
 
-  const availableBrands = Array.from(new Set(all.map((p) => p.brand)));
+  const availableBrands: string[] = Array.from(new Set(all.map((p) => p.brand)));
+
 
   return (
     <div className="container mx-auto px-4 py-6">

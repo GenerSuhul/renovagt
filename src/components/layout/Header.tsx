@@ -322,14 +322,8 @@ function SearchPanel({
       ) : (
         <div className="p-4">
           <div className="text-sm text-muted-foreground">No encontramos resultados para "{trimmedQuery}".</div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {popularSearches.map((term) => (
-              <button key={term} className="rounded-full bg-surface px-3 py-1 text-xs font-semibold">
-                {term}
-              </button>
-            ))}
-          </div>
         </div>
+
       )}
     </div>
   );

@@ -23,7 +23,9 @@ export const Route = createFileRoute("/checkout")({
 });
 
 function CheckoutPage() {
-  const { stores, shippingMethods } = Route.useLoaderData();
+  const { stores: storesRaw, shippingMethods: methodsRaw } = Route.useLoaderData();
+  const stores = storesRaw as import("@/lib/types").Store[];
+  const shippingMethods = methodsRaw as import("@/lib/types").ShippingMethod[];
   const { lines, subtotal, clear } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -49,6 +51,7 @@ function CheckoutPage() {
       : deliveryMethod.basePrice;
   const tax = subtotal * 0.12;
   const total = subtotal + shipping + tax;
+
 
   if (lines.length === 0) {
     return (

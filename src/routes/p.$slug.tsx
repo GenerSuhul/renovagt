@@ -42,12 +42,16 @@ export const Route = createFileRoute("/p/$slug")({
 });
 
 function ProductPage() {
-  const { product, related, stores, shippingMethods } = Route.useLoaderData();
+  const { product, related: relatedRaw, stores: storesRaw, shippingMethods: methodsRaw } = Route.useLoaderData();
+  const related = relatedRaw as import("@/lib/types").Product[];
+  const stores = storesRaw as import("@/lib/types").Store[];
+  const shippingMethods = methodsRaw as import("@/lib/types").ShippingMethod[];
   const deliveryMethod = shippingMethods.find((method) => method.type === "delivery") ?? shippingMethods[0];
   const pickupMethod = shippingMethods.find((method) => method.type === "pickup");
   const { add } = useCart();
   const [qty, setQty] = useState(1);
   const [pickup, setPickup] = useState(false);
+
 
   const inStock = product.stock > 0;
   const discount = product.originalPrice

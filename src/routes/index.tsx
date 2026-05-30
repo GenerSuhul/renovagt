@@ -31,9 +31,10 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const { products, shippingMethods, stores } = Route.useLoaderData();
-  const bestsellers = products.filter((p) => p.labels?.includes("bestseller"));
-  const newArrivals = products.filter((p) => p.labels?.includes("new") || p.labels?.includes("sale"));
-  const recommended = products.filter((p) => !p.labels?.includes("bestseller")).slice(0, 8);
+  const bestsellers = (products as Product[]).filter((p) => p.labels?.includes("bestseller"));
+  const newArrivals = (products as Product[]).filter((p) => p.labels?.includes("new") || p.labels?.includes("sale"));
+  const recommended = (products as Product[]).filter((p) => !p.labels?.includes("bestseller")).slice(0, 8);
+
 
   return (
     <div className="enterprise-shell">
