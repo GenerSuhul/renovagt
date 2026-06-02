@@ -946,6 +946,57 @@ export type Database = {
         }
         Relationships: []
       }
+      sap_business_partners: {
+        Row: {
+          card_name: string | null
+          created_at: string
+          credit_limit: number | null
+          customer_type: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          last_sap_sync_at: string | null
+          nit: string | null
+          phone: string | null
+          price_list: string | null
+          raw: Json | null
+          sap_card_code: string
+          updated_at: string
+        }
+        Insert: {
+          card_name?: string | null
+          created_at?: string
+          credit_limit?: number | null
+          customer_type?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          last_sap_sync_at?: string | null
+          nit?: string | null
+          phone?: string | null
+          price_list?: string | null
+          raw?: Json | null
+          sap_card_code: string
+          updated_at?: string
+        }
+        Update: {
+          card_name?: string | null
+          created_at?: string
+          credit_limit?: number | null
+          customer_type?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          last_sap_sync_at?: string | null
+          nit?: string | null
+          phone?: string | null
+          price_list?: string | null
+          raw?: Json | null
+          sap_card_code?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sap_events: {
         Row: {
           event_type: string
