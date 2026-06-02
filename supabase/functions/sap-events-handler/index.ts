@@ -221,8 +221,8 @@ async function projectInventory(sb: any, rows: JsonRecord[]) {
 
     const qty = Number(r.on_hand ?? 0);
     const committed = Number(r.committed ?? 0);
-    const available = Number(r.available ?? Math.max(qty - committed, 0));
 
+    // `available` is a generated column (qty - committed) — do not write it.
     await sb
       .from("inventory")
       .upsert(
@@ -231,7 +231,6 @@ async function projectInventory(sb: any, rows: JsonRecord[]) {
           store_id: storeId,
           qty,
           committed,
-          available,
           last_sap_sync_at: new Date().toISOString(),
         },
         { onConflict: "product_id,store_id" },
