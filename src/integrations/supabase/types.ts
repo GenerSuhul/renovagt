@@ -62,6 +62,81 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_price_list_items: {
+        Row: {
+          created_at: string
+          id: string
+          price: number
+          price_list_id: string
+          product_id: string | null
+          sap_item_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          price: number
+          price_list_id: string
+          product_id?: string | null
+          sap_item_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          price?: number
+          price_list_id?: string
+          product_id?: string | null
+          sap_item_code?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_price_list_items_price_list_id_fkey"
+            columns: ["price_list_id"]
+            isOneToOne: false
+            referencedRelation: "admin_price_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_price_list_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_price_lists: {
+        Row: {
+          code: string
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       brands: {
         Row: {
           created_at: string
@@ -222,6 +297,108 @@ export type Database = {
         }
         Relationships: []
       }
+      customers: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          metadata: Json
+          name: string | null
+          phone: string | null
+          sap_card_code: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          metadata?: Json
+          name?: string | null
+          phone?: string | null
+          sap_card_code?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          metadata?: Json
+          name?: string | null
+          phone?: string | null
+          sap_card_code?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      error_recovery_tasks: {
+        Row: {
+          aggregate_id: string | null
+          aggregate_type: string | null
+          attempts: number
+          created_at: string
+          id: string
+          last_error: string | null
+          payload: Json
+          resolved_at: string | null
+          scheduled_at: string
+          status: string
+          task_type: string
+        }
+        Insert: {
+          aggregate_id?: string | null
+          aggregate_type?: string | null
+          attempts?: number
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          payload?: Json
+          resolved_at?: string | null
+          scheduled_at?: string
+          status?: string
+          task_type: string
+        }
+        Update: {
+          aggregate_id?: string | null
+          aggregate_type?: string | null
+          attempts?: number
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          payload?: Json
+          resolved_at?: string | null
+          scheduled_at?: string
+          status?: string
+          task_type?: string
+        }
+        Relationships: []
+      }
+      idempotency_keys: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          key: string
+          response: Json | null
+          scope: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          key: string
+          response?: Json | null
+          scope: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          key?: string
+          response?: Json | null
+          scope?: string
+        }
+        Relationships: []
+      }
       integration_event_queue: {
         Row: {
           aggregate_id: string | null
@@ -273,6 +450,8 @@ export type Database = {
           product_id: string
           qty: number
           reorder_point: number
+          reserved_ecommerce: number
+          safety_stock: number
           store_id: string
           updated_at: string
         }
@@ -284,6 +463,8 @@ export type Database = {
           product_id: string
           qty?: number
           reorder_point?: number
+          reserved_ecommerce?: number
+          safety_stock?: number
           store_id: string
           updated_at?: string
         }
@@ -295,6 +476,8 @@ export type Database = {
           product_id?: string
           qty?: number
           reorder_point?: number
+          reserved_ecommerce?: number
+          safety_stock?: number
           store_id?: string
           updated_at?: string
         }
@@ -325,6 +508,7 @@ export type Database = {
           qty: number
           status: string
           store_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -335,6 +519,7 @@ export type Database = {
           qty: number
           status?: string
           store_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -345,6 +530,7 @@ export type Database = {
           qty?: number
           status?: string
           store_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -532,6 +718,36 @@ export type Database = {
           },
         ]
       }
+      order_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          order_id: string
+          reason: string | null
+          to_status: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          order_id: string
+          reason?: string | null
+          to_status: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          order_id?: string
+          reason?: string | null
+          to_status?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           coupon_code: string | null
@@ -545,7 +761,9 @@ export type Database = {
           order_number: string
           payment_method: string | null
           payment_status: string
+          ready_for_sap: boolean
           sap_doc_entry: number | null
+          sap_gate_blocked: boolean
           sap_sync_status: string | null
           shipping: number
           shipping_address: Json | null
@@ -569,7 +787,9 @@ export type Database = {
           order_number?: string
           payment_method?: string | null
           payment_status?: string
+          ready_for_sap?: boolean
           sap_doc_entry?: number | null
+          sap_gate_blocked?: boolean
           sap_sync_status?: string | null
           shipping?: number
           shipping_address?: Json | null
@@ -593,7 +813,9 @@ export type Database = {
           order_number?: string
           payment_method?: string | null
           payment_status?: string
+          ready_for_sap?: boolean
           sap_doc_entry?: number | null
+          sap_gate_blocked?: boolean
           sap_sync_status?: string | null
           shipping?: number
           shipping_address?: Json | null
@@ -604,6 +826,72 @@ export type Database = {
           total?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      payment_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          order_id: string | null
+          payload: Json
+          payment_id: string | null
+          processed_at: string | null
+          provider: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          order_id?: string | null
+          payload?: Json
+          payment_id?: string | null
+          processed_at?: string | null
+          provider: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          order_id?: string | null
+          payload?: Json
+          payment_id?: string | null
+          processed_at?: string | null
+          provider?: string
+        }
+        Relationships: []
+      }
+      payment_gateways: {
+        Row: {
+          code: string
+          config: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          config?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          provider: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          config?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          provider?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -741,6 +1029,9 @@ export type Database = {
           currency: string
           description: string | null
           dimensions: Json | null
+          ecommerce_status: string
+          enrichment_required: boolean
+          enrichment_status: string
           id: string
           image: string | null
           images: Json
@@ -751,9 +1042,12 @@ export type Database = {
           price: number
           rating: number
           reviews: number
+          safety_stock_default: number
           sap_item_code: string | null
           sap_last_sync_at: string | null
+          sap_raw_payload: Json | null
           sap_sync_status: string
+          shipping_class: string | null
           short_description: string | null
           sku: string
           slug: string
@@ -769,6 +1063,9 @@ export type Database = {
           currency?: string
           description?: string | null
           dimensions?: Json | null
+          ecommerce_status?: string
+          enrichment_required?: boolean
+          enrichment_status?: string
           id?: string
           image?: string | null
           images?: Json
@@ -779,9 +1076,12 @@ export type Database = {
           price?: number
           rating?: number
           reviews?: number
+          safety_stock_default?: number
           sap_item_code?: string | null
           sap_last_sync_at?: string | null
+          sap_raw_payload?: Json | null
           sap_sync_status?: string
+          shipping_class?: string | null
           short_description?: string | null
           sku: string
           slug: string
@@ -797,6 +1097,9 @@ export type Database = {
           currency?: string
           description?: string | null
           dimensions?: Json | null
+          ecommerce_status?: string
+          enrichment_required?: boolean
+          enrichment_status?: string
           id?: string
           image?: string | null
           images?: Json
@@ -807,9 +1110,12 @@ export type Database = {
           price?: number
           rating?: number
           reviews?: number
+          safety_stock_default?: number
           sap_item_code?: string | null
           sap_last_sync_at?: string | null
+          sap_raw_payload?: Json | null
           sap_sync_status?: string
+          shipping_class?: string | null
           short_description?: string | null
           sku?: string
           slug?: string
@@ -839,25 +1145,34 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          email: string | null
           full_name: string | null
           id: string
           phone: string | null
+          role: string | null
+          status: string
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id: string
           phone?: string | null
+          role?: string | null
+          status?: string
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null
+          role?: string | null
+          status?: string
           updated_at?: string
         }
         Relationships: []
@@ -997,6 +1312,36 @@ export type Database = {
         }
         Relationships: []
       }
+      sap_entity_mappings: {
+        Row: {
+          created_at: string
+          entity_type: string
+          id: string
+          local_id: string
+          metadata: Json
+          sap_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_type: string
+          id?: string
+          local_id: string
+          metadata?: Json
+          sap_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_type?: string
+          id?: string
+          local_id?: string
+          metadata?: Json
+          sap_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sap_events: {
         Row: {
           event_type: string
@@ -1025,6 +1370,42 @@ export type Database = {
         Relationships: []
       }
       sap_sync_log: {
+        Row: {
+          direction: string
+          error: string | null
+          finished_at: string | null
+          id: string
+          job: string
+          records_failed: number
+          records_processed: number
+          started_at: string
+          status: string
+        }
+        Insert: {
+          direction: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          job: string
+          records_failed?: number
+          records_processed?: number
+          started_at?: string
+          status: string
+        }
+        Update: {
+          direction?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          job?: string
+          records_failed?: number
+          records_processed?: number
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      sap_sync_logs: {
         Row: {
           direction: string
           error: string | null
@@ -1308,6 +1689,51 @@ export type Database = {
         }
         Relationships: []
       }
+      system_settings: {
+        Row: {
+          description: string | null
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          description?: string | null
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       wishlist_items: {
         Row: {
           created_at: string
@@ -1343,10 +1769,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      apply_payment_event: {
+        Args: { p_event: Json; p_order_id: string }
+        Returns: undefined
+      }
+      checkout_create_order: {
+        Args: { p_payload: Json; p_user_id: string }
+        Returns: string
+      }
+      expire_inventory_reservations: { Args: never; Returns: number }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
+      release_order_reservations: {
+        Args: { p_order_id: string; p_reason?: string }
+        Returns: number
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "super_admin" | "admin" | "staff" | "customer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1473,6 +1913,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["super_admin", "admin", "staff", "customer"],
+    },
   },
 } as const
