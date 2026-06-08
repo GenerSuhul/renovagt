@@ -2232,6 +2232,11 @@ function ProductMediaWindow({
     }
     setUploading("banner");
     try {
+      const dims = BANNER_DIMENSIONS[bannerForm.placement];
+      if (dims) {
+        await assertBannerDimensions(bannerDesktopFile, dims.desktop, "desktop");
+        if (bannerMobileFile) await assertBannerDimensions(bannerMobileFile, dims.mobile, "mobile");
+      }
       const desktopUpload = await uploadAdminMediaFile({
         bucket: MEDIA_BUCKETS.banners,
         file: bannerDesktopFile,
