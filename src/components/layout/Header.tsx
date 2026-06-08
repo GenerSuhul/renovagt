@@ -4,7 +4,6 @@ import {
   BadgePercent,
   ChevronDown,
   Heart,
-  MapPin,
   Menu,
   Search,
   ShoppingCart,
@@ -14,7 +13,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { formatPrice } from "@/lib/format";
-import { getCategories, getProducts, getPromotionalBanners, getShippingMethods } from "@/lib/catalog";
+import { FALLBACK_PRODUCT_IMAGE, getCategories, getProducts, getPromotionalBanners, getShippingMethods } from "@/lib/catalog";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -24,11 +23,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-const LOGO_URL = "https://puntos.renovagt.com/assets/logo-renova-Chq2YGIx.png";
+const LOGO_URL = "https://rpqnenzvnkaytaguvape.supabase.co/storage/v1/object/public/logo/logo%20renova%20ferre%20blanco.png";
+
 export function Header() {
   const { count } = useCart();
   const { user, signOut } = useAuth();
@@ -65,84 +65,57 @@ export function Header() {
   }, [categories, normalizedQuery]);
 
   const hasSearchResults = productMatches.length > 0 || categoryMatches.length > 0;
-  const popularSearches = products
-    .flatMap((product) => [product.name, product.sku, product.brand])
-    .filter(Boolean)
-    .slice(0, 4);
 
   return (
     <header className="sticky top-0 z-50 bg-background shadow-sm">
       {headerPromos[0] && (
-      <div className="border-b border-border bg-white text-sm">
-        <div className="renova-container flex h-10 items-center justify-center gap-2 px-4 text-center font-semibold text-foreground">
-          <BadgePercent className="hidden h-4 w-4 text-primary sm:block" />
-          <span>{headerPromos[0].title}</span>
-          {headerPromos[0].targetUrl && <Link to={headerPromos[0].targetUrl} className="font-black underline">Ver mas</Link>}
+        <div className="border-b border-border bg-white">
+          <div className="renova-container flex h-8 items-center justify-center gap-2 px-4 text-center text-xs font-semibold text-foreground">
+            <BadgePercent className="hidden h-4 w-4 text-primary sm:block" />
+            <span className="line-clamp-1">{headerPromos[0].title}</span>
+            {headerPromos[0].targetUrl && (
+              <Link to={headerPromos[0].targetUrl} className="shrink-0 font-black underline">
+                Ver mas
+              </Link>
+            )}
+          </div>
         </div>
-      </div>
       )}
 
       <div className="bg-primary text-primary-foreground">
-        <div className="renova-container flex min-h-[88px] items-center gap-5 px-4 py-4">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-white/10 lg:hidden">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-80">
-              <SheetHeader>
-                <SheetTitle>Categorías</SheetTitle>
-              </SheetHeader>
-              <nav className="mt-5 flex flex-col gap-1">
-                {categories.map((category) => (
-                  <Link
-                    key={category.id}
-                    to="/c/$slug"
-                    params={{ slug: category.slug }}
-                    className="rounded-md px-3 py-2.5 text-sm font-semibold hover:bg-muted"
-                  >
-                    {category.name}
-                  </Link>
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
+        <div className="renova-container flex min-h-[62px] items-center gap-2 px-3 py-1 md:min-h-[66px] md:gap-5 md:px-4">
+          <MainMenu categories={categories} shippingMethods={shippingMethods} user={user} />
 
-          <Link to="/" className="flex shrink-0 items-center rounded-md bg-white px-4 py-2 shadow-sm">
-            <img src={LOGO_URL} alt="Renova" className="h-12 w-[180px] object-contain" />
+          <Link
+            to="/"
+            className="mx-auto flex h-[62px] w-[150px] shrink-0 items-center justify-center overflow-hidden md:mx-0 md:h-[66px] md:w-[235px]"
+          >
+            <img
+              src={LOGO_URL}
+              alt="Renova"
+              className="h-full w-full scale-[2.05] object-contain drop-shadow-sm md:scale-[1.92]"
+            />
           </Link>
 
-          <div className="relative mx-auto hidden max-w-3xl flex-1 md:block">
-            <Search className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-foreground" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") setQuery("");
-              }}
-              placeholder="¿Qué estás buscando?"
-              className="h-12 rounded-md border-0 bg-white pl-5 pr-12 text-foreground shadow-none focus-visible:ring-2 focus-visible:ring-white/50"
-              aria-label="Buscar productos"
+          <div className="relative mx-auto hidden max-w-[760px] flex-1 md:block">
+            <SearchBox
+              query={query}
+              setQuery={setQuery}
+              hasSearchResults={hasSearchResults}
+              productMatches={productMatches}
+              categoryMatches={categoryMatches}
+              trimmedQuery={trimmedQuery}
+              subtle
             />
-            {trimmedQuery.length >= 2 && (
-              <SearchPanel
-                hasSearchResults={hasSearchResults}
-                productMatches={productMatches}
-                categoryMatches={categoryMatches}
-                trimmedQuery={trimmedQuery}
-                onPick={() => setQuery("")}
-              />
-            )}
           </div>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-0 flex shrink-0 items-center gap-1 md:ml-auto md:gap-2">
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="hidden h-12 gap-2 text-primary-foreground hover:bg-white/10 md:flex">
-                    <User className="h-7 w-7" />
-                    <span className="max-w-[140px] truncate font-bold">{user.email?.split("@")[0]}</span>
+                  <Button variant="ghost" className="hidden h-9 gap-2 text-primary-foreground hover:bg-white/10 md:flex">
+                    <User className="h-4 w-4" />
+                    <span className="max-w-[120px] truncate text-sm font-bold">{user.email?.split("@")[0]}</span>
                     <ChevronDown className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -151,46 +124,63 @@ export function Header() {
                   <DropdownMenuItem asChild><Link to="/account/orders">Mis pedidos</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild><Link to="/account/wishlist">Lista de deseos</Link></DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()}>Cerrar sesión</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => signOut()}>Cerrar sesion</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link to="/login" className="hidden md:block">
-                <Button variant="ghost" className="h-12 gap-2 text-primary-foreground hover:bg-white/10">
-                  <User className="h-7 w-7" />
-                  <span className="font-bold">Iniciar sesión</span>
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </Link>
+              <Button asChild variant="ghost" className="hidden h-9 gap-2 text-primary-foreground hover:bg-white/10 md:inline-flex">
+                <Link to="/login">
+                  <User className="h-4 w-4" />
+                  <span className="font-bold">Iniciar sesion</span>
+                </Link>
+              </Button>
             )}
 
-            <Link to="/account/wishlist" className="hidden lg:block">
-              <Button variant="ghost" size="icon" className="h-12 w-12 text-primary-foreground hover:bg-white/10">
-                <Heart className="h-6 w-6" />
-              </Button>
-            </Link>
+            <Button asChild variant="ghost" size="icon" className="hidden h-9 w-9 text-primary-foreground hover:bg-white/10 lg:inline-flex">
+              <Link to="/account/wishlist" aria-label="Lista de deseos">
+                <Heart className="h-5 w-5" />
+              </Link>
+            </Button>
 
-            <Link to="/cart">
-              <Button variant="ghost" className="relative h-12 gap-2 text-primary-foreground hover:bg-white/10">
-                <ShoppingCart className="h-8 w-8" />
-                <span className="hidden font-bold sm:inline">Carrito</span>
+            <Button
+              asChild
+              variant="ghost"
+              className="relative h-12 gap-2 px-2 text-primary-foreground hover:bg-white/10 [&_svg]:!size-8 md:h-10 md:px-3 md:[&_svg]:!size-5"
+            >
+              <Link to="/cart">
+                <ShoppingCart />
+                <span className="hidden text-sm font-bold sm:inline">Carrito</span>
                 {count > 0 && (
-                  <span className="absolute right-2 top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-[11px] font-black text-primary">
+                  <span className="absolute right-0 top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-white px-1 text-[11px] font-black text-primary md:right-1 md:top-0 md:h-4 md:min-w-4 md:text-[10px]">
                     {count}
                   </span>
                 )}
-              </Button>
-            </Link>
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        <div className="border-t border-white/10 px-4 pb-3 md:hidden">
+          <div className="renova-container px-0">
+            <SearchBox
+              query={query}
+              setQuery={setQuery}
+              hasSearchResults={hasSearchResults}
+              productMatches={productMatches}
+              categoryMatches={categoryMatches}
+              trimmedQuery={trimmedQuery}
+              subtle
+            />
           </div>
         </div>
       </div>
 
-      <div className="border-b border-border bg-white">
-        <div className="renova-container flex h-14 items-center gap-5 overflow-x-auto px-4 text-[15px] font-semibold">
+      <div className="hidden border-b border-border bg-white md:block">
+        <div className="renova-container flex h-11 items-center gap-6 px-4 text-sm font-semibold">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex h-full shrink-0 items-center gap-1.5 hover:text-primary">
-                Categorías <ChevronDown className="h-4 w-4" />
+                Categorias <ChevronDown className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-[330px] p-5">
@@ -230,30 +220,160 @@ export function Header() {
           <Link to="/" className="shrink-0 hover:text-primary">Inicio</Link>
           <Link to="/stores" className="shrink-0 hover:text-primary">Tiendas</Link>
           <Link to="/account/orders" className="shrink-0 hover:text-primary">Mis pedidos</Link>
-          {categories.slice(0, 3).map((category) => (
-            <Link key={category.id} to="/c/$slug" params={{ slug: category.slug }} className="shrink-0 hover:text-primary">
-              {category.name}
-            </Link>
-          ))}
-          <span className="ml-auto hidden shrink-0 items-center gap-2 text-sm text-muted-foreground xl:flex">
-            <Truck className="h-4 w-4 text-primary" /> Envío a domicilio
+          <span className="ml-auto hidden shrink-0 items-center gap-2 text-sm text-muted-foreground lg:flex">
+            <Truck className="h-4 w-4 text-primary" /> Envio a domicilio
             <Store className="ml-3 h-4 w-4 text-primary" /> Retiro en tienda
           </span>
         </div>
       </div>
-
-      <div className="border-b border-border bg-white px-4 py-3 md:hidden">
-        <div className="relative">
-          <Search className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-foreground" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="¿Qué estás buscando?"
-            className="h-11 rounded-md bg-surface pr-12"
-          />
-        </div>
-      </div>
     </header>
+  );
+}
+
+function MainMenu({
+  categories,
+  shippingMethods,
+  user,
+}: {
+  categories: Awaited<ReturnType<typeof getCategories>>;
+  shippingMethods: Awaited<ReturnType<typeof getShippingMethods>>;
+  user: ReturnType<typeof useAuth>["user"];
+}) {
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-12 w-12 shrink-0 text-primary-foreground hover:bg-white/10 [&_svg]:!size-8 md:hidden"
+          aria-label="Abrir menu"
+        >
+          <Menu />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-[340px] max-w-[86vw] overflow-y-auto p-0">
+        <SheetHeader className="border-b border-border p-5 text-left">
+          <SheetTitle>Menu Renova</SheetTitle>
+          <div className="text-sm text-muted-foreground">Departamentos, servicios y accesos rapidos.</div>
+        </SheetHeader>
+        <div className="p-5">
+          <SheetClose asChild>
+            <Link
+              to={user ? "/account" : "/login"}
+              className="mb-5 flex h-11 items-center justify-center rounded-full bg-primary px-4 text-sm font-black text-primary-foreground hover:bg-primary-hover"
+            >
+              {user ? "Mi cuenta" : "Inicia sesion o crea una cuenta"}
+            </Link>
+          </SheetClose>
+
+          <MenuSection title="Navegacion">
+            <MenuLink to="/" label="Inicio" />
+            <MenuLink to="/stores" label="Tiendas" />
+            <MenuLink to="/account/orders" label="Mis pedidos" />
+          </MenuSection>
+
+          <MenuSection title="Categorias">
+            {categories.length === 0 ? (
+              <div className="rounded-md bg-surface px-3 py-2 text-sm text-muted-foreground">Sin categorias activas</div>
+            ) : (
+              categories.map((category) => (
+                <SheetClose key={category.id} asChild>
+                  <Link
+                    to="/c/$slug"
+                    params={{ slug: category.slug }}
+                    className="flex items-center justify-between rounded-md px-3 py-2.5 text-sm font-semibold hover:bg-muted"
+                  >
+                    {category.name}
+                    <ChevronDown className="h-4 w-4 -rotate-90 text-muted-foreground" />
+                  </Link>
+                </SheetClose>
+              ))
+            )}
+          </MenuSection>
+
+          <MenuSection title="Servicios">
+            {shippingMethods.length === 0 ? (
+              <div className="rounded-md bg-surface px-3 py-2 text-sm text-muted-foreground">Sin servicios configurados</div>
+            ) : (
+              shippingMethods.map((service) => (
+                <div key={service.id} className="rounded-md px-3 py-2.5 text-sm font-semibold">
+                  {service.name}
+                  <div className="mt-0.5 text-xs font-normal text-muted-foreground">
+                    {[service.estimatedDays, service.basePrice ? formatPrice(service.basePrice) : undefined].filter(Boolean).join(" - ")}
+                  </div>
+                </div>
+              ))
+            )}
+          </MenuSection>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function MenuSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="border-t border-border py-4 first:border-t-0 first:pt-0">
+      <h3 className="mb-2 text-xs font-black uppercase tracking-[0.14em] text-muted-foreground">{title}</h3>
+      <div className="space-y-1">{children}</div>
+    </section>
+  );
+}
+
+function MenuLink({ to, label }: { to: "/" | "/stores" | "/account/orders"; label: string }) {
+  return (
+    <SheetClose asChild>
+      <Link to={to} className="flex rounded-md px-3 py-2.5 text-sm font-semibold hover:bg-muted">
+        {label}
+      </Link>
+    </SheetClose>
+  );
+}
+
+function SearchBox({
+  query,
+  setQuery,
+  hasSearchResults,
+  productMatches,
+  categoryMatches,
+  trimmedQuery,
+  subtle,
+}: {
+  query: string;
+  setQuery: (query: string) => void;
+  hasSearchResults: boolean;
+  productMatches: Awaited<ReturnType<typeof getProducts>>;
+  categoryMatches: Awaited<ReturnType<typeof getCategories>>;
+  trimmedQuery: string;
+  subtle?: boolean;
+}) {
+  return (
+    <div className="relative">
+      <Search className="pointer-events-none absolute right-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-foreground/80" />
+      <Input
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") setQuery("");
+        }}
+        placeholder="Que estas buscando?"
+        className={
+          subtle
+            ? "h-10 rounded-lg border border-white/30 bg-white/95 pl-4 pr-10 text-sm text-foreground shadow-sm focus-visible:ring-2 focus-visible:ring-white/50"
+            : "h-10 rounded-lg bg-surface pr-10 text-sm"
+        }
+        aria-label="Buscar productos"
+      />
+      {trimmedQuery.length >= 2 && (
+        <SearchPanel
+          hasSearchResults={hasSearchResults}
+          productMatches={productMatches}
+          categoryMatches={categoryMatches}
+          trimmedQuery={trimmedQuery}
+          onPick={() => setQuery("")}
+        />
+      )}
+    </div>
   );
 }
 
@@ -287,11 +407,11 @@ function SearchPanel({
                   onClick={onPick}
                   className="flex items-center gap-3 rounded-md p-2 hover:bg-muted"
                 >
-                  <img src={product.image} alt="" className="h-12 w-12 rounded-md bg-surface object-cover" />
+                  <img src={product.image || FALLBACK_PRODUCT_IMAGE} alt="" className="h-12 w-12 rounded-md bg-surface object-contain" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-semibold">{product.name}</span>
                     <span className="block truncate text-xs text-muted-foreground">
-                      {product.brand} · {product.sku}
+                      {product.brand} - {product.sku}
                     </span>
                   </span>
                   <span className="text-sm font-bold">{formatPrice(product.price)}</span>
@@ -302,7 +422,7 @@ function SearchPanel({
           {categoryMatches.length > 0 && (
             <div className="mt-1 border-t border-border pt-1">
               <div className="px-2 py-1.5 text-[11px] font-bold uppercase text-muted-foreground">
-                Categorías
+                Categorias
               </div>
               {categoryMatches.map((category) => (
                 <Link
@@ -323,7 +443,6 @@ function SearchPanel({
         <div className="p-4">
           <div className="text-sm text-muted-foreground">No encontramos resultados para "{trimmedQuery}".</div>
         </div>
-
       )}
     </div>
   );

@@ -30,6 +30,7 @@ export const SAP_ENDPOINTS = {
   productBySku: (sku: string) => `/catalog/products/${encodeURIComponent(sku)}`,
   categories: "/catalog/categories",
   prices: "/catalog/prices",
+  pricesBySku: (sku: string) => `/catalog/prices/${encodeURIComponent(sku)}`,
   // Inventory
   inventory: "/inventory/stock",
   inventoryByStore: (storeId: string) => `/inventory/stock/${encodeURIComponent(storeId)}`,
@@ -39,11 +40,17 @@ export const SAP_ENDPOINTS = {
   // Orders
   orders: "/orders",
   orderById: (id: string) => `/orders/${encodeURIComponent(id)}`,
+  // Invoices / credit notes
+  invoiceForOrder: (orderId: string) => `/orders/${encodeURIComponent(orderId)}/invoice`,
+  invoiceByOrder: (orderId: string) => `/invoices/by-order/${encodeURIComponent(orderId)}`,
+  creditNotes: "/credit-notes",
   // Stores / Warehouses
   stores: "/stores",
   // Promotions
   promotions: "/promotions",
   // Shipping
+  shipments: "/shipments",
+  shipmentsByOrder: (orderId: string) => `/shipments/by-order/${encodeURIComponent(orderId)}`,
   shippingStatus: (orderId: string) => `/shipping/${encodeURIComponent(orderId)}/status`,
 } as const;
 

@@ -14,10 +14,15 @@ export type Brand = {
 export type Product = {
   id: string;
   sku: string;
+  sapItemCode?: string;
   slug: string;
   name: string;
+  shortDescription?: string;
   brand: string;
+  brandId?: string;
   categorySlug: string;
+  categoryId?: string;
+  categoryName?: string;
   price: number;
   originalPrice?: number;
   rating: number;
@@ -29,6 +34,12 @@ export type Product = {
   stock: number;
   storeStock?: { storeId: string; qty: number }[];
   labels?: ("new" | "sale" | "bestseller" | "low-stock")[];
+  ecommerceStatus?: "draft" | "needs_enrichment" | "enriched" | "published" | "archived" | string;
+  enrichmentStatus?: "needs_enrichment" | "in_review" | "complete" | string;
+  enrichmentRequired?: boolean;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type Store = {
@@ -45,9 +56,13 @@ export type PromotionalBanner = {
   title: string;
   subtitle?: string;
   image: string;
+  desktopImage: string;
+  mobileImage: string;
   targetUrl?: string;
   placement: string;
   sortOrder: number;
+  textAlign?: string;
+  textTheme?: string;
 };
 
 export type ShippingMethod = {
@@ -58,6 +73,18 @@ export type ShippingMethod = {
   basePrice: number;
   freeFrom?: number;
   estimatedDays?: string;
+};
+
+export type PaymentGateway = {
+  id: string;
+  code: string;
+  name: string;
+  provider: string;
+  environment: string;
+  status: string;
+  currency: string;
+  supportsInstallments: boolean;
+  webhookUrl?: string;
 };
 
 export type CartLine = {

@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS public.shipping_methods (
   free_from NUMERIC(12,2),
   estimated_days TEXT NOT NULL DEFAULT '24-72h',
   is_active BOOLEAN NOT NULL DEFAULT true,
+  sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

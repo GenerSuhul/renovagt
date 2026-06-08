@@ -16,6 +16,25 @@ export interface SapProductDTO {
   Properties?: Record<string, string>;
 }
 
+export interface SapCategoryDTO {
+  Code: string | number;
+  Name: string;
+  ParentCode?: string | number;
+  IsActive?: boolean;
+}
+
+export interface SapPriceDTO {
+  ItemCode: string;
+  PriceListCode: string | number;
+  PriceListName?: string;
+  Price: number;
+  Currency: string;
+  Uom?: string;
+  CustomerGroupCode?: string | number;
+  ValidFrom?: string;
+  ValidTo?: string;
+}
+
 export interface SapInventoryDTO {
   ItemCode: string;
   WarehouseCode: string;
@@ -52,12 +71,55 @@ export interface SapOrderDTO {
   PaymentMethod?: string;
 }
 
+export interface SapInvoiceDTO {
+  DocEntry?: number;
+  DocNum?: number;
+  OrderId: string;
+  CardCode: string;
+  DocDate: string;
+  DocTotal: number;
+  Currency: string;
+  Status?: string;
+  SapPdfUrl?: string;
+}
+
+export interface SapCreditNoteDTO {
+  DocEntry: number;
+  DocNum?: number;
+  BaseInvoiceDocEntry?: number;
+  CardCode: string;
+  DocDate: string;
+  DocTotal: number;
+  Currency: string;
+  Reason?: string;
+}
+
 export interface SapStoreDTO {
   WarehouseCode: string;
   WarehouseName: string;
   Street?: string;
   City?: string;
   Phone?: string;
+}
+
+export interface SapShipmentDTO {
+  OrderId: string;
+  DeliveryDocEntry?: number;
+  Carrier?: string;
+  TrackingNumber?: string;
+  TrackingUrl?: string;
+  Status: string;
+  UpdatedAt: string;
+}
+
+export interface SapPromotionDTO {
+  Code: string;
+  Name: string;
+  DiscountType: "percent" | "fixed" | string;
+  DiscountValue: number;
+  StartsAt?: string;
+  EndsAt?: string;
+  IsActive: boolean;
 }
 
 export interface SapApiError {

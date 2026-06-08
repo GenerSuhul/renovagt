@@ -109,11 +109,13 @@
   }
   html {
     font-family: var(--font-sans);
+    font-size: 15px;
     -webkit-font-smoothing: antialiased;
   }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    line-height: 1.45;
   }
   ::selection {
     background: color-mix(in oklab, var(--color-primary) 25%, white);
@@ -142,5 +144,21 @@
   .renova-container {
     width: min(100% - 2rem, 1720px);
     margin-inline: auto;
+  }
+
+  .admin-input {
+    height: 2.75rem;
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    background: white;
+    padding-inline: 0.75rem;
+    font-size: 0.875rem;
+    outline: none;
+  }
+
+  .admin-input:focus {
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 18%, transparent);
+    border-color: color-mix(in oklab, var(--color-primary) 55%, var(--color-border));
   }
 }

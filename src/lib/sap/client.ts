@@ -1,9 +1,8 @@
 /**
  * Thin HTTP client for the SAP middleware.
  *
- * IMPORTANT: This client is a placeholder integration layer. All HTTP
- * calls will currently throw `SapNotConfiguredError` unless the
- * SAP_MIDDLEWARE_* environment variables are set.
+ * Calls fail fast with `SapNotConfiguredError` when the server runtime
+ * has no SAP_MIDDLEWARE_* environment variables configured.
  *
  * Use this client ONLY inside `createServerFn` handlers — never from
  * the browser. The API key must never reach the client bundle.

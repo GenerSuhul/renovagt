@@ -1,4 +1,13 @@
-project_id = "vciksohdjxjrnhnipkls"
+project_id = "rpqnenzvnkaytaguvape"
 
 [functions.sap-events-handler]
+verify_jwt = false
+
+[functions.checkout-orchestrator]
+verify_jwt = false
+
+[functions.payment-events-handler]
+verify_jwt = false
+
+[functions.admin-ops-handler]
 verify_jwt = false

@@ -4,21 +4,32 @@ export type AdminTable =
   | "admin_price_lists"
   | "admin_price_list_items"
   | "customer_accounts"
+  | "sap_business_partners"
   | "shipping_methods"
   | "product_shipping_rules"
   | "payment_gateways"
+  | "profiles"
   | "categories"
   | "products"
   | "inventory"
   | "orders"
   | "order_items"
+  | "order_status_history"
   | "carts"
+  | "payments"
+  | "payment_events"
   | "product_images"
+  | "category_images"
+  | "brand_images"
   | "product_variants"
   | "inventory_reservations"
   | "shipments"
   | "integration_event_queue"
+  | "sap_events"
+  | "sap_entity_mappings"
   | "sap_sync_logs"
+  | "sap_sync_log"
+  | "idempotency_keys"
   | "invoices"
   | "crm_activity_timeline"
   | "support_tickets"
@@ -26,6 +37,9 @@ export type AdminTable =
   | "coupon_rules"
   | "notifications"
   | "audit_logs"
+  | "system_settings"
+  | "user_roles"
+  | "error_recovery_tasks"
   | "promotional_banners";
 
 type DbRecord = Record<string, unknown>;
@@ -38,6 +52,7 @@ type Query = {
   eq: (column: string, value: unknown) => Query;
   order: (column: string, options?: { ascending?: boolean }) => Query;
   limit: (count: number) => Query;
+  range: (from: number, to: number) => Query;
   single: () => Promise<{ data: DbRecord | null; error: Error | null }>;
   then: Promise<{ data: DbRecord[] | null; error: Error | null }>["then"];
 };
@@ -56,13 +71,25 @@ const parseJson = (value: string | undefined, fallback: unknown) => {
 
 const nullableNumber = (value: string | undefined) => (value ? Number(value) : null);
 
-export async function listAdminRecords(table: AdminTable, columns = "*") {
-  const { data, error } = await from(table).select(columns).limit(100);
-  if (error) {
-    console.error(`[Admin CRUD] list ${table} failed`, error.message);
-    return [];
+export async function listAdminRecords(table: AdminTable, columns = "*", limit = 1000) {
+  const pageSize = 1000;
+  const rows: DbRecord[] = [];
+
+  for (let offset = 0; offset < limit; offset += pageSize) {
+    const to = Math.min(offset + pageSize - 1, limit - 1);
+    const { data, error } = await from(table).select(columns).range(offset, to);
+    if (error) {
+      if (!error.message.includes("Could not find the table")) {
+        console.warn(`[Admin CRUD] list ${table} failed`, error.message);
+      }
+      return rows;
+    }
+    const chunk = data ?? [];
+    rows.push(...chunk);
+    if (chunk.length < pageSize) break;
   }
-  return data ?? [];
+
+  return rows;
 }
 
 export async function createAdminRecord(table: AdminTable, payload: DbRecord) {
@@ -98,27 +125,30 @@ export function buildPayload(module: string, values: Record<string, string>): { 
       };
     case "b2c-users":
       return {
-        table: "customer_accounts",
+        table: "sap_business_partners",
         payload: {
-          account_type: "b2c",
+          sap_card_code: values.sap_card_code || `WEB-${Date.now()}`,
+          customer_type: "B2C",
           email: values.email,
-          full_name: values.full_name,
+          card_name: values.full_name,
           phone: values.phone || null,
-          status: values.status || "active",
+          is_active: values.status !== "blocked",
+          price_list: values.price_list || null,
         },
       };
     case "b2b-users":
       return {
-        table: "customer_accounts",
+        table: "sap_business_partners",
         payload: {
-          account_type: "b2b",
+          sap_card_code: values.sap_card_code || `B2B-${Date.now()}`,
+          customer_type: "B2B",
           email: values.email,
-          full_name: values.full_name,
+          card_name: values.company_name || values.full_name,
           phone: values.phone || null,
-          company_name: values.company_name,
-          tax_id: values.tax_id || null,
+          nit: values.tax_id || null,
           credit_limit: Number(values.credit_limit || 0),
-          status: values.status || "pending",
+          is_active: values.status !== "blocked",
+          price_list: values.price_list || null,
         },
       };
     case "shipping":
@@ -130,7 +160,7 @@ export function buildPayload(module: string, values: Record<string, string>): { 
           type: values.type || "delivery",
           base_price: Number(values.base_price || 0),
           free_from: values.free_from ? Number(values.free_from) : null,
-          estimated_days: values.estimated_days || "24-72h",
+          estimated_days: values.estimated_days || "Por definir",
           is_active: values.status !== "inactive",
         },
       };
@@ -150,25 +180,40 @@ export function buildPayload(module: string, values: Record<string, string>): { 
         },
       };
     case "products":
-      return {
-        table: "products",
-        payload: {
-          sku: values.sku,
-          slug: values.slug,
-          name: values.name,
-          price: Number(values.price || 0),
-          original_price: values.original_price ? Number(values.original_price) : null,
-          image: values.image,
-          description: values.description,
-          short_description: values.short_description || values.description,
-          barcode: values.barcode || null,
-          weight_kg: Number(values.weight_kg || 0),
-          width_cm: Number(values.width_cm || 0),
-          height_cm: Number(values.height_cm || 0),
-          depth_cm: Number(values.depth_cm || 0),
-          is_active: true,
-        },
-      };
+      {
+        const image = values.image || "https://puntos.renovagt.com/assets/logo-renova-Chq2YGIx.png";
+        const ecommerceStatus = values.ecommerce_status || (values.status === "inactive" ? "draft" : "published");
+        const needsEnrichment = ecommerceStatus === "needs_enrichment";
+        return {
+          table: "products",
+          payload: {
+            sku: values.sku,
+            slug: values.slug,
+            name: values.name,
+            price: Number(values.price || 0),
+            original_price: values.original_price ? Number(values.original_price) : null,
+            currency: values.currency || "GTQ",
+            image,
+            images: image ? [image] : [],
+            description: values.description,
+            short_description: values.short_description || values.description,
+            weight_kg: nullableNumber(values.weight_kg),
+            dimensions: {
+              width_cm: Number(values.width_cm || 0),
+              height_cm: Number(values.height_cm || 0),
+              depth_cm: Number(values.depth_cm || 0),
+            },
+            sap_item_code: values.sap_item_code || values.sku,
+            sap_sync_status: "manual",
+            ecommerce_status: ecommerceStatus,
+            enrichment_status: needsEnrichment ? "needs_enrichment" : "complete",
+            enrichment_required: needsEnrichment,
+            shipping_class: values.shipping_class || "standard",
+            safety_stock_default: Number(values.safety_stock_default || 0),
+            is_active: values.status !== "inactive",
+          },
+        };
+      }
     case "shipping-products":
       return {
         table: "product_shipping_rules",
@@ -197,12 +242,10 @@ export function buildPayload(module: string, values: Record<string, string>): { 
         table: "product_images",
         payload: {
           product_id: values.product_id,
-          image_url: values.image_url,
-          alt_text: values.alt_text || null,
+          url: values.image_url,
+          alt: values.alt_text || null,
           sort_order: Number(values.sort_order || 0),
           is_primary: values.is_primary === "true",
-          width: nullableNumber(values.width),
-          height: nullableNumber(values.height),
         },
       };
     case "content":
@@ -224,10 +267,9 @@ export function buildPayload(module: string, values: Record<string, string>): { 
         payload: {
           product_id: values.product_id,
           sku: values.sku,
-          barcode: values.barcode || null,
           name: values.name,
           attributes: parseJson(values.attributes, {}),
-          price: nullableNumber(values.price),
+          price_delta: Number(values.price_delta || values.price || 0),
           is_active: values.status !== "inactive",
         },
       };
@@ -250,7 +292,7 @@ export function buildPayload(module: string, values: Record<string, string>): { 
           origin_store_id: values.origin_store_id || null,
           carrier: "FORZA",
           status: values.status || "pending",
-          quote_amount: nullableNumber(values.quote_amount),
+          cost: nullableNumber(values.quote_amount),
           weight_kg: nullableNumber(values.weight_kg),
           volumetric_weight: nullableNumber(values.volumetric_weight),
           package_count: Number(values.package_count || 1),
@@ -272,11 +314,9 @@ export function buildPayload(module: string, values: Record<string, string>): { 
       return {
         table: "invoices",
         payload: {
-          order_id: values.order_id,
+          order_id: values.order_id || null,
           invoice_number: values.invoice_number,
-          invoice_type: values.invoice_type || "consumer",
-          tax_identifier: values.tax_identifier || null,
-          invoice_status: values.invoice_status || "pending",
+          status: values.invoice_status || "pending",
           subtotal: Number(values.subtotal || 0),
           tax: Number(values.tax || 0),
           total: Number(values.total || 0),

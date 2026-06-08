@@ -16,6 +16,7 @@ dist-ssr
 .nitro
 *.local
 .codex-screenshots/
+supabase/.temp/
 
 # Wrangler / Cloudflare
 .wrangler/

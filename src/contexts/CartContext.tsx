@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { FALLBACK_PRODUCT_IMAGE } from "@/lib/catalog";
 import type { CartLine, Product } from "@/lib/types";
 
-const STORAGE_KEY = "renova_cart_v1";
+const STORAGE_KEY = "renova_cart_v2_middleware_cutover";
 
 type CartContextValue = {
   lines: CartLine[];
@@ -15,13 +16,29 @@ type CartContextValue = {
 
 const CartContext = createContext<CartContextValue | null>(null);
 
+const asCartLine = (value: unknown): CartLine | null => {
+  if (!value || typeof value !== "object") return null;
+  const record = value as Record<string, unknown>;
+  const productId = typeof record.productId === "string" ? record.productId : "";
+  const sku = typeof record.sku === "string" ? record.sku : "";
+  const name = typeof record.name === "string" ? record.name : "";
+  const price = typeof record.price === "number" ? record.price : Number(record.price || 0);
+  const qty = typeof record.qty === "number" ? record.qty : Number(record.qty || 0);
+  if (!productId || !name || qty <= 0) return null;
+  const image = typeof record.image === "string" && record.image.trim() ? record.image : FALLBACK_PRODUCT_IMAGE;
+  return { productId, sku, name, price, image, qty };
+};
+
+const sanitizeLines = (value: unknown): CartLine[] =>
+  Array.isArray(value) ? value.map(asCartLine).filter((line): line is CartLine => Boolean(line)) : [];
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
 
   useEffect(() => {
     try {
       const raw = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
-      if (raw) setLines(JSON.parse(raw));
+      if (raw) setLines(sanitizeLines(JSON.parse(raw)));
     } catch {
       /* noop */
     }
@@ -34,10 +51,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const add = useCallback((product: Product, qty = 1) => {
     setLines((prev) => {
+      if (product.stock <= 0 || qty <= 0) return prev;
       const existing = prev.find((l) => l.productId === product.id);
       if (existing) {
         return prev.map((l) =>
-          l.productId === product.id ? { ...l, qty: Math.min(l.qty + qty, product.stock) } : l,
+          l.productId === product.id ? { ...l, qty: Math.max(1, Math.min(l.qty + qty, product.stock)) } : l,
         );
       }
       return [
@@ -47,8 +65,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
           sku: product.sku,
           name: product.name,
           price: product.price,
-          image: product.image,
-          qty: Math.min(qty, product.stock),
+          image: product.image || FALLBACK_PRODUCT_IMAGE,
+          qty: Math.max(1, Math.min(qty, product.stock)),
         },
       ];
     });

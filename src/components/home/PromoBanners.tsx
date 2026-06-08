@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
-import { getPromotionalBanners } from "@/lib/catalog";
+import { FALLBACK_PRODUCT_IMAGE, getPromotionalBanners } from "@/lib/catalog";
 
 export function PromoBanners() {
   const { data: promos = [] } = useQuery({
@@ -19,7 +19,7 @@ export function PromoBanners() {
           to={promo.targetUrl || "/"}
           className="group relative flex min-h-[180px] flex-col justify-between overflow-hidden rounded-xl bg-secondary p-7 text-primary-foreground"
         >
-          <img src={promo.image} alt="" className="absolute inset-0 h-full w-full object-cover opacity-45" />
+          <img src={promo.image || FALLBACK_PRODUCT_IMAGE} alt="" className="absolute inset-0 h-full w-full object-cover opacity-45" />
           <div className="absolute inset-0 bg-gradient-to-br from-black/60 to-primary/70" />
           <div className="relative">
             {promo.subtitle && <div className="text-sm opacity-90">{promo.subtitle}</div>}
