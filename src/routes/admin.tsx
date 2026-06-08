@@ -577,6 +577,41 @@ const BANNER_PLACEMENTS = {
   },
 } as const;
 
+const BANNER_DIMENSIONS: Record<string, { desktop: [number, number]; mobile: [number, number] }> = {
+  home_slider: { desktop: [1920, 520], mobile: [1080, 1080] },
+  category_hero: { desktop: [1600, 420], mobile: [1080, 760] },
+  sidebar: { desktop: [720, 900], mobile: [1080, 1080] },
+  popup: { desktop: [900, 900], mobile: [900, 900] },
+};
+
+async function readImageDimensions(file: File): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const result = { width: img.naturalWidth, height: img.naturalHeight };
+      URL.revokeObjectURL(url);
+      resolve(result);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("No se pudo leer la imagen"));
+    };
+    img.src = url;
+  });
+}
+
+async function assertBannerDimensions(file: File, expected: [number, number], label: string) {
+  const { width, height } = await readImageDimensions(file);
+  const [ew, eh] = expected;
+  const tolerance = 0.03;
+  const widthOk = Math.abs(width - ew) / ew <= tolerance;
+  const heightOk = Math.abs(height - eh) / eh <= tolerance;
+  if (!widthOk || !heightOk) {
+    throw new Error(`La imagen ${label} debe ser ${ew} x ${eh} px (subiste ${width} x ${height} px).`);
+  }
+}
+
 type BannerPlacement = keyof typeof BANNER_PLACEMENTS;
 
 const PAGE_DESTINATIONS = [
